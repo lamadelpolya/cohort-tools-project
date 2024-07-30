@@ -37,8 +37,10 @@ app.use(
     origin: "http://localhost:5005", // Replace with your frontend URL
   })
 );
+
 app.get("/docs", (req, res) => {
   res.sendFile(__dirname + "/views/docs.html");
+
 });
 app.get("api/cohorts", (req, res) => {
   res.json(cohorts);
