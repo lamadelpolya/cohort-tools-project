@@ -1,6 +1,6 @@
 const router = require("express").Router();
 
-const Cohort = require("../models/Cohorts.model");
+const Cohort = require("../models/cohorts");
 
 // Create Cohorts
 router.post("/", async (req, res) => {

@@ -35,13 +35,13 @@ app.use(morgan("dev"));
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use("/students", studentRouter);
-app.use("/cohorts", cohortRouter);
+app.use("/Students.routes", studentRouter);
+app.use("/Cohorts.routes", cohortRouter);
 
 // ROUTES - https://expressjs.com/en/starter/basic-routing.html
 // Devs Team - Start working on the routes here:
 // ...
-router.post("/", async (req, res) => {
+app.post("/", async (req, res) => {
   const student = new Student(req.body);
   try {
     await student.save();
@@ -52,7 +52,7 @@ router.post("/", async (req, res) => {
 });
 
 // Get all students
-router.get("/", async (req, res) => {
+app.get("/", async (req, res) => {
   try {
     const students = await Student.find();
     res.send(students);
@@ -62,7 +62,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get students by cohort ID
-router.get("/cohort/:cohortId", async (req, res) => {
+app.get("/cohort/:cohortId", async (req, res) => {
   try {
     const students = await Student.find({ cohort: req.params.cohortId });
     res.send(students);
@@ -72,7 +72,7 @@ router.get("/cohort/:cohortId", async (req, res) => {
 });
 
 // Get a student by ID
-router.get("/:studentId", async (req, res) => {
+app.get("/:studentId", async (req, res) => {
   try {
     const student = await Student.findById(req.params.studentId);
     if (!student) return res.status(404).send();
@@ -83,7 +83,7 @@ router.get("/:studentId", async (req, res) => {
 });
 
 // Update a student by ID
-router.put("/:studentId", async (req, res) => {
+app.put("/:studentId", async (req, res) => {
   try {
     const student = await Student.findByIdAndUpdate(
       req.params.studentId,
@@ -98,7 +98,7 @@ router.put("/:studentId", async (req, res) => {
 });
 
 // Delete a student by ID
-router.delete("/:studentId", async (req, res) => {
+app.delete("/:studentId", async (req, res) => {
   try {
     const student = await Student.findByIdAndDelete(req.params.studentId);
     if (!student) return res.status(404).send();
