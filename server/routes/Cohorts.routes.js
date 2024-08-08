@@ -1,75 +1,143 @@
 const router = require("express").Router();
+const { isAuthenticated } = require("../middleware/jwt.middleware");
+const Cohort = require("../models/Cohort.model");
+const mongoose = require("mongoose");
 
-const Cohort = require("../models/cohorts");
-
-// Create Cohorts
-router.post("/", async (req, res) => {
-  try {
-    const createdCohort = await Cohort.create(req.body);
-    res.status(201).json(createdCohort);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
-  }
-});
-
-// Get All Cohorts
-
-router.get("/", async (req, res) => {
-  try {
-    const allCohort = await Cohort.find();
-    res.status(200).json(allCohort);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
-  }
-});
-
-// Get a Specific Cohort
-
-router.get("/:cohortId", async (req, res) => {
-  try {
-    const { cohortId } = req.params;
-    const singleCohort = await Cohort.findById(cohortId);
-    res.json(singleCohort);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
-  }
-});
-
-// Update Cohorts
-
-router.put("/:cohortId", async (req, res) => {
-  try {
-    const { cohortId } = req.params;
-    const updatedCohort = await Cohort.findById(cohortId, req.body, {
-      new: true,
-      runValidators: true,
+//GET /cohorts
+router.get("/cohorts", (req, res) => {
+  Cohort.find({})
+    .then((cohorts) => {
+      console.log("Retrieved cohorts ->", cohorts);
+      res.json(cohorts);
+    })
+    .catch((error) => {
+      console.error("Error while retrieving cohorts ->", error);
+      res.status(500).send({ error: "Failed to retrieve cohorts" });
     });
-
-    res.json({
-      message: "Cohort was updated succesfully! -> ",
-      cohort: updatedCohort,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
-  }
+  //res.json(cohorts);
 });
 
-// Delete Cohort
+// GET /cohorts/:cohortId
+router.get("/cohorts/:cohortId", (req, res) => {
+  const { cohortId } = req.params;
 
-router.delete("/:cohortId", async (req, res) => {
-  try {
-    const { cohortId } = req.params;
-    await Book.findByIdAndDelete(cohortId);
-
-    res.json({ message: "Cohort was deleted succesfully" });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
+  if (!mongoose.Types.ObjectId.isValid(cohortId)) {
+    res.status(400).json({ message: "Specified id is not valid" });
+    return;
   }
+
+  Cohort.findById(cohortId)
+    .then((cohort) => {
+      console.log("Retrieved cohorts ->", cohort);
+      res.json(cohort);
+    })
+    .catch((error) => {
+      console.error("Error while retrieving cohort ->", error);
+      res.status(500).send({ error: "Failed to retrieve cohort" });
+    });
+  //res.json(cohorts);
+});
+
+// POST /cohorts
+router.post("/cohorts", (req, res, next) => {
+  const {
+    inProgress,
+    cohortSlug,
+    cohortName,
+    program,
+    campus,
+    startDate,
+    endDate,
+    programManager,
+    leadTeacher,
+    totalHours,
+  } = req.body;
+
+  const newCohort = {
+    inProgress,
+    cohortSlug,
+    cohortName,
+    program,
+    campus,
+    startDate,
+    endDate,
+    programManager,
+    leadTeacher,
+    totalHours,
+  };
+
+  Cohort.create(newCohort)
+    .then(() => {
+      res.json(newCohort);
+    })
+    .catch((err) => {
+      res.status(500);
+      console.log(err);
+    });
+});
+
+//PUT /cohorts/:cohortId
+router.put("/cohorts/:cohortId", (req, res, next) => {
+  const { cohortId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(cohortId)) {
+    res.status(400).json({ message: "Specified id is not valid" });
+    return;
+  }
+
+  const {
+    inProgress,
+    cohortSlug,
+    cohortName,
+    program,
+    campus,
+    startDate,
+    endDate,
+    programManager,
+    leadTeacher,
+    totalHours,
+  } = req.body;
+
+  const updatedCohort = {
+    inProgress,
+    cohortSlug,
+    cohortName,
+    program,
+    campus,
+    startDate,
+    endDate,
+    programManager,
+    leadTeacher,
+    totalHours,
+  };
+
+  Cohort.findByIdAndUpdate(cohortId, updatedCohort, { new: true })
+    .then(() => {
+      res.json(updatedCohort);
+    })
+    .catch((err) => {
+      res.status(500);
+      console.log(err);
+    });
+});
+
+//DELETE /cohorts/:cohortId
+router.delete("/cohorts/:cohortId", (req, res, next) => {
+  const { cohortId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(cohortId)) {
+    res.status(400).json({ message: "Specified id is not valid" });
+    return;
+  }
+
+  Cohort.findByIdAndDelete(cohortId)
+    .then(() => {
+      res.send(204);
+    })
+    .catch((err) => {
+      res.status(500);
+      console.log(err);
+    });
 });
 
 module.exports = router;
